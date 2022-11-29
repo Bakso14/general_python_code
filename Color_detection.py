@@ -54,7 +54,7 @@ while(1):
 
     _, frame = cap.read()                   
 
-    scale_percent = 60 # percent of original size
+    scale_percent = 30 # percent of original size
     width = int(frame.shape[1] * scale_percent / 100)
     height = int(frame.shape[0] * scale_percent / 100)
     dim = (width, height)
@@ -81,7 +81,7 @@ while(1):
 
         momen()                 
 
-    #cv2.imshow('frame',frame)
+    cv2.imshow('frame',frame)
     cv2.imshow('mask',mask)
     #cv2.imshow('res',res)
     #cv2.imshow('hsv',hsv)
