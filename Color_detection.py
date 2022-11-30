@@ -1,3 +1,5 @@
+# & "c:/Users/sayyi/OneDrive/Dokumen/Python Scripts/.mv/Scripts/Activate.ps1"
+
 from __future__ import print_function
 from __future__ import division
 import cv2
