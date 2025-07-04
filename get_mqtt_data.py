@@ -1,15 +1,6 @@
-# import required module
+
 from playsound import playsound
-
-# for playing note.wav file
-playsound('F:/Github/general_python_code/sound/suara_cek.mp3')
-print('playing sound using  playsound')
-
-
-# python 3.11
-
 import random
-
 from paho.mqtt import client as mqtt_client
 
 
@@ -44,6 +35,18 @@ def connect_mqtt() -> mqtt_client:
 def subscribe(client: mqtt_client):
     def on_message(client, userdata, msg):
         print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+        # print(type(msg.payload.decode()))
+        
+        if(msg.topic == topic_tandon):
+            if(msg.payload.decode() == '11'):
+                print("PENUH")
+                playsound('F:/Github/general_python_code/sound/suara_cek.mp3')
+            elif(msg.payload.decode() == '01'):
+                print("BERKURANG")
+            elif(msg.payload.decode() == '00'):
+                print("KOSONG")
+                playsound('F:/Github/general_python_code/sound/suara_cek.mp3')
+                
 
     client.subscribe(topic_tandon)
     client.subscribe(topic_arus)
