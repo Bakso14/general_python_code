@@ -11,8 +11,8 @@ def on_message(client, userdata, msg):
 
         # Kirim ke Laravel
         import requests
-        #res = requests.post("https://smartirrigation.nextiotlab.com/api/mqtt-receive", json=data)
-        res = requests.post("http://127.0.0.1:8000/api/mqtt-receive", json=data)
+        res = requests.post("https://smartirrigation.nextiotlab.com/api/mqtt-receive", json=data)
+        #res = requests.post("http://127.0.0.1:8000/api/mqtt-receive", json=data)
         print("Kirim ke Laravel:", res.status_code)
 
     except Exception as e:

@@ -56,7 +56,7 @@ while(1):
 
     _, frame = cap.read()                   
 
-    scale_percent = 30 # percent of original size
+    scale_percent = 100 # percent of original size
     width = int(frame.shape[1] * scale_percent / 100)
     height = int(frame.shape[0] * scale_percent / 100)
     dim = (width, height)
