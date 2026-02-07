@@ -73,6 +73,83 @@ def calc_control(x, goal, obs_list, config):
                 best_u = [v, w]
     return best_u
 
+def calc_control_full(x, goal, obs_list, config):
+    best_u = [0, 0]
+    min_cost = float("inf")
+    
+    # Simpan semua kandidat trajektori untuk dinormalisasi nanti
+    trajectories = []
+    # Inisialisasi list untuk menampung nilai mentah (raw values)
+    raw_heading = []
+    raw_clearance = []
+    raw_velocity = []
+
+    for v in np.arange(0, config.max_speed, 0.4):
+        for w in np.arange(-config.max_yaw_rate, config.max_yaw_rate, 0.4):
+            predict_state = list(x)
+            collision = False
+            closest_dist = float("inf") # Untuk komponen Beta (Clearance)
+            
+            for _ in range(int(config.predict_time / config.dt)):
+                predict_state = motion(predict_state, v, w, config.dt)
+                
+                # Cek rintangan
+                for ob in obs_list:
+                    d = math.hypot(predict_state[0]-ob.x, predict_state[1]-ob.y)
+                    if d < config.robot_radius:
+                        collision = True; break
+                    if d < closest_dist: closest_dist = d
+                if collision: break
+            
+            if not collision:
+                # 1. Heading (Alpha): Selisih sudut ke goal
+                # Kita hitung sudut ke target dari posisi akhir prediksi
+                angle_to_goal = math.atan2(goal[1]-predict_state[1], goal[0]-predict_state[0])
+                heading_cost = abs(angle_to_goal - predict_state[2])
+                
+                # 2. Clearance (Beta): Kebalikan dari jarak terdekat
+                # Semakin jauh dari rintangan, cost semakin kecil
+                clearance_cost = 1.0 / closest_dist if closest_dist != 0 else float("inf")
+                
+                # 3. Velocity (Gamma): Kecepatan tinggi lebih baik
+                velocity_cost = config.max_speed - v
+                
+                trajectories.append({
+                    'u': [v, w],
+                    'heading': heading_cost,
+                    'clearance': clearance_cost,
+                    'velocity': velocity_cost
+                })
+
+    # --- Tahap Normalisasi dan Pembobotan (Sigma) ---
+    # Di sinilah Alpha, Beta, dan Gamma berperan
+    alpha = 0.1  # Fokus ke arah target
+    beta = 1.0   # Fokus menjauhi rintangan (dibuat lebih tinggi agar hati-hati)
+    gamma = 1.5  # Fokus ke kecepatan (dibuat rendah agar tidak ugal-ugalan)
+
+    for traj in trajectories:
+        raw_heading.append(traj['heading'])
+        raw_clearance.append(traj['clearance'])
+        raw_velocity.append(traj['velocity'])
+
+    # 2. Inilah peran SIGMA (Smoothing/Normalization)
+    sum_h = sum(raw_heading) if sum(raw_heading) != 0 else 1
+    sum_c = sum(raw_clearance) if sum(raw_clearance) != 0 else 1
+    sum_v = sum(raw_velocity) if sum(raw_velocity) != 0 else 1
+
+    # 3. Hitung skor akhir dengan nilai yang sudah "halus" (0 sampai 1)
+    for i, traj in enumerate(trajectories):
+        # Sigma (Normalisasi) terjadi di sini: (traj['heading'] / sum_h)
+        final_cost = alpha * (traj['heading'] / sum_h) + \
+                    beta  * (traj['clearance'] / sum_c) + \
+                    gamma * (traj['velocity'] / sum_v)
+        
+        if final_cost < min_cost:
+            min_cost = final_cost
+            best_u = traj['u']
+            
+    return best_u
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
