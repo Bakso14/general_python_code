@@ -123,9 +123,9 @@ def calc_control_full(x, goal, obs_list, config):
 
     # --- Tahap Normalisasi dan Pembobotan (Sigma) ---
     # Di sinilah Alpha, Beta, dan Gamma berperan
-    alpha = 0.1  # Fokus ke arah target
-    beta = 1.0   # Fokus menjauhi rintangan (dibuat lebih tinggi agar hati-hati)
-    gamma = 1.5  # Fokus ke kecepatan (dibuat rendah agar tidak ugal-ugalan)
+    alpha = 0.5  # Fokus ke arah target
+    beta = 5.0   # Fokus menjauhi rintangan (dibuat lebih tinggi agar hati-hati)
+    gamma = 2.0  # Fokus ke kecepatan (dibuat rendah agar tidak ugal-ugalan)
 
     for traj in trajectories:
         raw_heading.append(traj['heading'])
